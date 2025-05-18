@@ -1,8 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const connectDB = require('./config/database');
-const errorHandler = require('./middleware/errorHandler');
 const gstinRoutes = require('./routes/gstinRoutes');
 const gstr2aRoutes = require('./routes/gstr2aRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
@@ -13,13 +11,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors({
-    origin: "*"
-}));
+app.use(cors());
 app.use(express.json());
 
 // Serve static files from the public directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
 // Routes
 app.use('/api', gstinRoutes);
@@ -29,20 +25,8 @@ app.use('/api/sample', sampleDataRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'OK',
-        environment: process.env.NODE_ENV,
-        timestamp: new Date().toISOString()
-    });
+    res.json({ status: 'OK' });
 });
-
-// Catch-all route for SPA
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Error handling
-app.use(errorHandler);
 
 // Initialize database and start server
 async function init() {
@@ -57,7 +41,6 @@ async function init() {
         // Start the server
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
-            console.log('Environment:', process.env.NODE_ENV);
         });
         
     } catch (error) {
