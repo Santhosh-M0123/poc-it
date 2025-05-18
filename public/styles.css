@@ -29,16 +29,73 @@
 }
 
 /* Table styles */
-.table-hover tr:hover {
-    background-color: #f8fafc;
+.table-auto {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-auto thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f9fafb;
+    z-index: 10;
+    white-space: normal;
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    vertical-align: top;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.table-auto tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+/* Column-specific widths */
+.table-auto th:nth-child(1), /* GSTIN */
+.table-auto td:nth-child(1) {
+    min-width: 160px;
+}
+
+.table-auto th:nth-child(2), /* PAN */
+.table-auto td:nth-child(2) {
+    min-width: 100px;
+}
+
+.table-auto th:nth-child(3), /* Legal Name */
+.table-auto td:nth-child(3) {
+    min-width: 200px;
+}
+
+.table-auto th:nth-child(4), /* TDS GSTIN */
+.table-auto td:nth-child(4) {
+    min-width: 160px;
+}
+
+.table-auto th:nth-child(7), /* TDS Eligible Invoices */
+.table-auto td:nth-child(7) {
+    min-width: 180px;
+}
+
+.table-auto th:nth-child(8), /* TDS to be deducted */
+.table-auto th:nth-child(9), /* TDS deducted as per GSTR-7 */
+.table-auto td:nth-child(8),
+.table-auto td:nth-child(9) {
+    min-width: 150px;
 }
 
 /* Status badges */
 .status-badge {
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 500;
+    display: inline-block;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .status-badge-registered {
@@ -76,12 +133,27 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-/* Responsive table */
-@media (max-width: 768px) {
-    .responsive-table {
-        display: block;
-        overflow-x: auto;
-        white-space: nowrap;
+/* Responsive table container */
+.overflow-x-auto {
+    position: relative;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+}
+
+@media (max-width: 1024px) {
+    .overflow-x-auto {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .table-auto thead th {
+        font-size: 0.7rem;
+        padding: 0.5rem;
+    }
+    
+    .table-auto tbody td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
     }
 }
 
@@ -102,4 +174,39 @@
 
 .difference-negative {
     color: #dc2626;
+}
+
+/* Clickable row styles */
+tr.cursor-pointer {
+    transition: all 0.2s ease-in-out;
+}
+
+tr.cursor-pointer:hover {
+    background-color: #f3f4f6;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+tr.cursor-pointer:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Download icon styles */
+tr.cursor-pointer td:first-child {
+    position: relative;
+}
+
+tr.cursor-pointer td:first-child::after {
+    content: '⭳';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+tr.cursor-pointer:hover td:first-child::after {
+    opacity: 0.5;
 } 

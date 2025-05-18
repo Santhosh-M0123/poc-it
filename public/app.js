@@ -39,10 +39,43 @@ const getStatusBadge = (status) => {
     return `<span class="${badges[status] || badges.NOT_PAID}">${labels[status] || 'Not Paid'}</span>`;
 };
 
+// Handle row click for downloading GSTR2A
+const handleRowClick = async (gstinNumber) => {
+    try {
+        const response = await fetch(`/api/gstr2a/download/${gstinNumber}`);
+        if (!response.ok) {
+            throw new Error('Failed to download file');
+        }
+        
+        // Get the filename from the Content-Disposition header if available
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filename = contentDisposition 
+            ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+            : `${gstinNumber}_GSTR2A.xlsx`;
+
+        // Convert response to blob
+        const blob = await response.blob();
+        
+        // Create download link and trigger download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    } catch (error) {
+        console.error('Error downloading file:', error);
+        alert('Failed to download GSTR2A file. Please try again later.');
+    }
+};
+
 // Create table row for GSTIN details
 const createTableRow = (data) => {
     const row = document.createElement('tr');
-    row.className = 'hover:bg-gray-50 animate-fade-in';
+    row.className = 'hover:bg-gray-50 animate-fade-in cursor-pointer';
+    row.onclick = () => handleRowClick(data.gstinNumber);
     
     const tdsStatus = data.isTdsRegistered
         ? '<span class="status-badge status-badge-registered">Registered</span>'
@@ -55,6 +88,7 @@ const createTableRow = (data) => {
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${data.gstinNumber}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.panNumber}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.legalName}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${data.isTdsRegistered ? 'text-blue-600' : 'text-gray-400'}">${data.tdsGstinNumber}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm">${tdsStatus}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.totalInvoices}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.eligibleInvoices}</td>

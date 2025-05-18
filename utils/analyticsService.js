@@ -21,7 +21,15 @@ const getAnalyticsReport = async () => {
         // Get all GSTIN records
         const gstinRecords = await GstinMaster.find();
         const tdsRegistrations = await TdsGstin.find();
-        const tdsGstinSet = new Set(tdsRegistrations.map(tds => tds.tdsGstin));
+
+        // Create a map of PAN numbers to TDS GSTIN details
+        const tdsPanMap = new Map();
+        tdsRegistrations.forEach(tds => {
+            tdsPanMap.set(tds.linkedPan, {
+                tdsGstin: tds.tdsGstin,
+                legalName: tds.legalName
+            });
+        });
 
         // Get current month's payment period
         const currentDate = new Date();
@@ -32,7 +40,7 @@ const getAnalyticsReport = async () => {
         const tdsPaymentMap = new Map(tdsPayments.map(payment => [payment.gstin, payment]));
 
         // Process each GSTIN
-        let analyticsData = await Promise.all(gstinRecords.map(async (gstin) => {
+        const analyticsData = await Promise.all(gstinRecords.map(async (gstin) => {
             // Get all GSTR2A records for this GSTIN
             const gstr2aRecords = await Gstr2a.find({ gstin: gstin.gstin });
             
@@ -53,6 +61,10 @@ const getAnalyticsReport = async () => {
             // Calculate TDS difference
             const tdsDifference = tdsCalculation.tdsAmount - tdsPayment.deducteeAmount;
 
+            // Get TDS registration info based on PAN
+            const tdsInfo = tdsPanMap.get(gstin.panNumber);
+            const isTdsRegistered = !!tdsInfo;
+
             // Determine TDS status
             let tdsStatus = 'NOT_PAID';
             if (tdsPayment.paymentStatus === 'PAID') {
@@ -65,7 +77,8 @@ const getAnalyticsReport = async () => {
                 gstinNumber: gstin.gstin,
                 panNumber: gstin.panNumber,
                 legalName: gstin.legalName,
-                isTdsRegistered: tdsGstinSet.has(gstin.gstin),
+                tdsGstinNumber: tdsInfo ? tdsInfo.tdsGstin : '-',
+                isTdsRegistered: isTdsRegistered,
                 totalInvoices: allInvoices.length,
                 eligibleInvoices: tdsCalculation.eligibleInvoicesCount,
                 totalEligibleValue: tdsCalculation.totalEligibleValue,
