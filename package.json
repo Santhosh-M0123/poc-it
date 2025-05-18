@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
-    "build": "npm install && npm install --only=production"
-  },
+  "dev": "nodemon index.js",
+  "start": "node index.js",
+  "build": "npm ci --only=production"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
